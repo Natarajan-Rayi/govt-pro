@@ -122,6 +122,55 @@ app.post("/user-register", (req, res) => {
   }
 });
 
+app.post("/postal-code", (req, res) => {
+  const body = req.body;
+
+  const collectionRef = db.collection("user_register");
+
+  // Query to check if both fields exist
+  const query = collectionRef.where("postal", "==", body.postal);
+
+  query
+    .get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        res.status(500).json({
+          status: res.status,
+          message: "No data found for this postal code",
+        });
+      } else {
+        querySnapshot.forEach((docRef) => {
+          // const data = {
+          //   key1: docRef.id,
+          // };
+
+          // // Build the query string from the data object
+          // const queryString = Object.keys(data)
+          //   .map(
+          //     (key) =>
+          //       `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
+          //   )
+          //   .join("&");
+
+          res.status(200).json({
+            status: res.status,
+            doc_id: docRef.id,
+            doorNo: docRef.data().door_no,
+            street: docRef.data().street,
+            village: docRef.data().village,
+            district: docRef.data().district,
+            state: docRef.data().state,
+            country: docRef.data().country,
+          });
+        });
+        console.log("Fields exist in the documents");
+        // Perform further operations if needed
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking fields:", error);
+    });
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
