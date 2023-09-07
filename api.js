@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 // app.use(express.static("./cred"));
 
-var serviceAccount = require("./cred/govt-pro.json");
+var serviceAccount = require("../cred/govt-pro.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -169,6 +169,79 @@ app.post("/postal-code", (req, res) => {
     })
     .catch((error) => {
       console.error("Error checking fields:", error);
+    });
+});
+
+app.post("/gpmis-post", (req, res) => {
+  const body = req.body;
+  if (body.title !== "") {
+    const collectionRef = db.collection("gpmis_data");
+
+    collectionRef.get().then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        body.report_number = 1;
+        body.created_date = new Date().toDateString();
+        db.collection("gpmis_data")
+          .add(body)
+          .then((docRef) => {
+            res.status(200).json({
+              status: res.status,
+              message: "data added",
+              doc_id: docRef.id,
+            });
+          });
+      } else {
+        body.report_number = querySnapshot.size + 1;
+        body.created_date = new Date().toDateString();
+        db.collection("gpmis_data")
+          .add(body)
+          .then((docRef) => {
+            res.status(200).json({
+              status: res.status,
+              message: "data added",
+              doc_id: docRef.id,
+            });
+          });
+      }
+    });
+  } else {
+    res.status(500).json({
+      status: res.status,
+      message: "Title name is missing",
+    });
+  }
+});
+
+app.get("/gpmis-get", (req, res) => {
+  const collectionRef = db.collection("gpmis_data"); // Replace with the name of your collection
+
+  collectionRef
+    .get()
+    .then((snapshot) => {
+      if (snapshot.empty) {
+        res.status(500).json({
+          status: res.status,
+          message: "No record found",
+          doc_id: docRef.id,
+        });
+        console.log("No documents found in the collection.");
+      } else {
+        let full_data = [];
+        snapshot.forEach((doc) => {
+          console.log("Document data:", doc.id, doc.data());
+          let data = doc.data();
+          data.docId = doc.id;
+          full_data.push(data);
+        });
+        res.status(200).json({
+          status: res.status,
+          message: "fetch all",
+          data: full_data,
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching collection:", error);
     });
 });
 // Start the server
