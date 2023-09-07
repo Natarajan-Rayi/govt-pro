@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 // app.use(express.static("./cred"));
 
-var serviceAccount = require("../cred/govt-pro.json");
+var serviceAccount = require("./cred/govt-pro.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
