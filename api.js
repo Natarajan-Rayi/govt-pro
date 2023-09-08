@@ -244,6 +244,39 @@ app.get("/gpmis-get", (req, res) => {
       console.error("Error fetching collection:", error);
     });
 });
+
+app.get("/api-details-get", (req, res) => {
+  const collectionRef = db.collection("drop_down_details"); // Replace with the name of your collection
+
+  collectionRef
+    .get()
+    .then((snapshot) => {
+      if (snapshot.empty) {
+        res.status(500).json({
+          status: res.status,
+          message: "No record found",
+          doc_id: docRef.id,
+        });
+        console.log("No documents found in the collection.");
+      } else {
+        let full_data = [];
+        snapshot.forEach((doc) => {
+          console.log("Document data:", doc.id, doc.data());
+          let data = doc.data();
+          data.docId = doc.id;
+          full_data.push(data);
+        });
+        res.status(200).json({
+          status: res.status,
+          message: "fetch all",
+          data: full_data,
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching collection:", error);
+    });
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
